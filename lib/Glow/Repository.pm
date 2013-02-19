@@ -1,25 +1,22 @@
 package Glow::Repository;
 
-use Moose;
-use namespace::autoclean;
+use MooseX::Params::Validate;
 
 with 'Glow::Role::Repository';
 
+# use with Glow::Repository->spawn();
 
-around new => sub {
-    my ( $orig, $class, @args ) = @_;
-    my $self = $class->$orig(@args);
-
-    # get the class from the config
-    $class = $self->config->get( key => 'glow.class' )
+sub spawn {
+    my $class = shift;
+    my ( $dir ) = validated_list(
+        \@_,
+        dir   => { isa => 'Path::Class::Dir', optional => 1 },
+    );
+    $repo_class = Glow::Config->new(dir => ($dir // '.') )->get( key => 'glow.class' )
         || 'Glow::Repository::Git';
     eval "require $class" or die $@;
-    $class->new(@args);
-};
-
-sub _build_object_store;    # stub
-
-__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
+    $repo_class->new(@args);
+}
 
 # ABSTRACT: Factory class to build objects doing Glow::Role::Repository
 
