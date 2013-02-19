@@ -5,6 +5,7 @@ use namespace::autoclean;
 
 with 'Glow::Role::Repository';
 
+
 around new => sub {
     my ( $orig, $class, @args ) = @_;
     my $self = $class->$orig(@args);
